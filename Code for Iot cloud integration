@@ -1,0 +1,50 @@
+#include <WiFi.h>
+#include <HTTPClient.h>
+
+const char* ssid = "Wokwi-GUEST";
+const char* password = "";
+
+String apiKey = "GYNJIFBJS1KF5A8C";
+
+int pirPin = 2;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(pirPin, INPUT);
+
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("WiFi Connected");
+}
+
+void loop() {
+
+  int motion = digitalRead(pirPin);
+
+  if (WiFi.status() == WL_CONNECTED) {
+
+    HTTPClient http;
+
+    String url = "http://api.thingspeak.com/update?api_key=" +
+                 apiKey + "&field1=" + String(motion);
+
+    http.begin(url);
+
+    int httpCode = http.GET();
+
+    Serial.print("Motion: ");
+    Serial.println(motion);
+
+    Serial.print("HTTP Response: ");
+    Serial.println(httpCode);
+
+    http.end();
+  }
+
+  delay(20000);
+}
